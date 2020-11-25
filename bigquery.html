@@ -1,0 +1,57 @@
+<html>
+<head>
+<script src="https://apis.google.com/js/client.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script type="text/javascript" src="http://www.google.com/jsapi"></script>
+<script type="text/javascript">
+  google.load('visualization', '1', {packages: ['geochart']});
+</script>
+<script>
+  // UPDATE TO USE YOUR PROJECT ID AND CLIENT ID
+  var project_id = 'task-ali-asgar';
+  var client_id = 'task-ali-asgar.apps.googleusercontent.com';
+
+  var config = {
+    'client_id': client_id,
+    'scope': 'https://www.googleapis.com/auth/bigquery'
+  };
+
+  function runQuery() {
+   var request = gapi.client.bigquery.jobs.query({
+      'projectId': project_id,
+      'timeoutMs': '30000',
+      'query': 'SELECT * FROM `task-ali-asgar.store_data_firestore_export.stores_raw_changelog` LIMIT 1000'
+    });
+    request.execute(function(response) {     
+        console.log(response);
+        var stateValues = [["State", "Age"]];
+        $.each(response.result.rows, function(i, item) {
+          var state = item.f[0].v;
+          var age = parseFloat(item.f[1].v);
+          var stateValue = [state, age];
+          stateValues.push(stateValue);
+        });  
+        var data = google.visualization.arrayToDataTable(stateValues);
+        var geochart = new google.visualization.GeoChart(
+            document.getElementById('map'));
+        geochart.draw(data, {width: 556, height: 347, resolution: "provinces", region: "US"});
+    });
+  }
+
+  function auth() {
+    gapi.auth.authorize(config, function() {
+        gapi.client.load('bigquery', 'v2', runQuery);
+        $('#client_initiated').html('BigQuery client initiated');
+    });
+    $('#auth_button').hide();
+  }
+</script>
+</head>
+
+<body>
+<h2>Average Mother Age at First Birth in 2000</h2>
+<button id="auth_button" onclick="auth();">Authorize</button>
+<button id="query_button" style="display:none;" onclick="runQuery();">Run Query</button>
+<div id="map"></div>
+</body>
+</html>

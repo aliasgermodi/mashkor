@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Store Finder</title>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <style>
+    /* Always set the map height explicitly to define the size of the div
+     * element that contains the map. */
+    #map {
+      height: 50%;
+      width: 50%;
+      background-color: grey;
+    }
+
+    /* Optional: Makes the sample page fill the window. */
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* TODO: Step 4A1: Make a generic sidebar. */
+    /* Styling for an info pane that slides out from the left. 
+    * Hidden by default. */
+#panel {
+    height: 100%;
+    width: null;
+    background-color: white;
+    position: fixed;
+    z-index: 1;
+    overflow-x: hidden;
+    transition: all .2s ease-out;
+}
+
+.open {
+    width: 250px;
+}
+
+/* Styling for place details */
+.hero {
+    width: 100%;
+    height: auto;
+    max-height: 166px;
+    display: block;
+}
+
+.place,
+p {
+    font-family: 'open sans', arial, sans-serif;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+
+.details {
+    color: darkslategrey;
+}
+
+a {
+    text-decoration: none;
+    color: cadetblue;
+}
+  </style>
+</head>
+
+<body>
+  <!-- TODO: Step 4A2: Add a generic sidebar -->
+
+  <!-- Map appears here -->
+  <!-- TODO: Step 4A2: Add a generic sidebar -->
+<!-- The slide-out panel for showing place details -->
+<!-- <div id="panel"></div> -->
+  <div id="map"></div>
+  <div>
+    
+    <textarea id="mainText" placeholder="Enter data here"></textarea>
+    <button id="submitBtn" onclick="submitClick()">submit</button>
+  </div> 
+  <div>
+    <ul id="stores">
+    </ul>
+    </div>
+
+  <!-- TODO: Step 1B, Add a map -->
+</body>
+<!-- TODO: Step 1B, Add a map -->
+<script>
+    /* Note: This example requires that you consent to location sharing when
+     * prompted by your browser. If you see the error "Geolocation permission
+     * denied.", it means you probably did not give permission for the browser * to locate you. */
+
+    /* TODO: Step 2, Geolocate your user
+     * Replace the code from here to the END TODO comment with new code from
+     * codelab instructions. */
+     let pos;
+let map;
+let bounds;
+let infoWindow;
+let currentInfoWindow;
+let service;
+let infoPane;
+function initMap() {
+    // Initialize variables
+    bounds = new google.maps.LatLngBounds();
+    infoWindow = new google.maps.InfoWindow;
+    currentInfoWindow = infoWindow;
+    /* TODO: Step 4A3: Add a generic sidebar */
+    /* TODO: Step 4A3: Add a generic sidebar */
+infoPane = document.getElementById('panel');
+
+    // Try HTML5 geolocation
+    if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(position => {
+        pos = {
+        lat: 29.3353,//position.coords.latitude,
+        lng: 48.0716//position.coords.longitude
+        };
+        map = new google.maps.Map(document.getElementById('map'), {
+        center: pos,
+        zoom: 15
+        });
+        bounds.extend(pos);
+
+        infoWindow.setPosition(pos);
+        infoWindow.setContent('Location found.');
+        infoWindow.open(map);
+        map.setCenter(pos);
+
+        /* TODO: Step 3B2, Call the Places Nearby Search */
+        // Call Places Nearby Search on user's location
+        getNearbyPlaces(pos);
+    }, () => {
+        // Browser supports geolocation, but user has denied permission
+        handleLocationError(true, infoWindow);
+    });
+    } else {
+    // Browser doesn't support geolocation
+    handleLocationError(false, infoWindow);
+    }
+}
+
+// Handle a geolocation error
+function handleLocationError(browserHasGeolocation, infoWindow) {
+    // Set default location to Sydney, Australia
+    pos = {lat: 29.3353, lng: 48.0716};
+    map = new google.maps.Map(document.getElementById('map'), {
+    center: pos,
+    zoom: 15
+    });
+
+    // Display an InfoWindow at the map center
+    infoWindow.setPosition(pos);
+    infoWindow.setContent(browserHasGeolocation ?
+    'Geolocation permissions denied. Using default location.' :
+    'Error: Your browser doesn\'t support geolocation.');
+    infoWindow.open(map);
+    currentInfoWindow = infoWindow;
+
+    /* TODO: Step 3B3, Call the Places Nearby Search */
+}   // Call Places Nearby Search on the default location
+    function submitClick(){
+
+        var mainText = document.getElementById("mainText").value;
+        console.log(mainText)
+        getNearbyPlaces(pos,mainText);
+    }
+    
+    
+    /* END TODO: Step 2, Geolocate your user */
+    /* TODO: Step 3B1, Call the Places Nearby Search */
+    // Perform a Places Nearby Search Request
+    function getNearbyPlaces(position,key) {
+        
+        let request = {
+        location: position,
+        //rankBy: google.maps.places.RankBy.DISTANCE,
+        radius: 1000,
+        keyword: [key]
+        };
+
+        service = new google.maps.places.PlacesService(map);
+        service.nearbySearch(request, nearbyCallback);
+    }
+
+    // Handle the results (up to 20) of the Nearby Search
+    function nearbyCallback(results, status) {
+        if (status == google.maps.places.PlacesServiceStatus.OK) {
+        createMarkers(results);
+        }
+        document.getElementById('stores').innerHTML += '<li>' + JSON.stringify(results) + '</li>';
+        console.log(results)
+    }
+
+/* TODO: Step 3C, Generate markers for search results */
+// Set markers at the location of each place result
+function createMarkers(places) {
+    places.forEach(place => {
+    let marker = new google.maps.Marker({
+        position: place.geometry.location,
+        map: map,
+        title: place.name,
+    });
+
+    /* TODO: Step 4B: Add click listeners to the markers */
+    // Add click listener to each marker
+
+    // Adjust the map bounds to include the location of this marker
+    bounds.extend(place.geometry.location);
+    });
+    /* Once all the markers have been placed, adjust the bounds of the map to
+    * show all the markers within the visible area. */
+    map.fitBounds(bounds);
+}
+
+/* TODO: Step 4C: Show place details in an info window */
+// Builds an InfoWindow to display details above the marker
+
+
+/* TODO: Step 4D: Load place details in a sidebar */
+// Displays place details in a sidebar
+
+</script>
+
+<!-- TODO: Step 1C, Get an API key -->
+<!-- TODO: Step 3A, Load the Places Library -->
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIwzALxUPNbatRBj3Xi1Uhp0fFzwWNBkE&libraries=places&callback=initMap">
+</script>
+
+</html>

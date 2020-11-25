@@ -1,0 +1,29 @@
+<html>
+   <head></head>
+	
+<body>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/8.1.1/firebase.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyCUdc-UiOGE34eFRJp_e21tsqrFBEZ5eqw",
+    authDomain: "task-ali-asgar.firebaseapp.com",
+    databaseURL: "https://task-ali-asgar.firebaseio.com",
+    projectId: "task-ali-asgar",
+    storageBucket: "task-ali-asgar.appspot.com",
+    messagingSenderId: "886217848636",
+    appId: "1:886217848636:web:1dddbddf3de445d9a25039"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  var refe = firebase.database().ref('players');
+  console.log(refe);
+</script>
+
+   </body>
+</html>

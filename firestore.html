@@ -1,0 +1,111 @@
+<html>
+        <title>Mashkor Test</title>
+        <body>
+            <div>
+                <h1>Mashkor to realtime db</h1>
+                <textarea id="mainText" placeholder="Enter data here"></textarea>
+                <textarea id="emailText" placeholder="Enter data here"></textarea>
+                <button id="submitBtn" onclick="submitClick()">submit</button>
+            </div>
+            <div>
+                <textarea id="user_search" placeholder="Enter data here"></textarea>
+                <button id="submitSearch" onclick="submitSearch()">Search</button>
+            </div>
+            <div class="main-list" id="list_div">
+                <div>
+                    <h3>User List:</h3>
+                </div>
+            </div>
+            <div class="main-list" id="list_div1">
+                <div>
+                    <h3>Filtered User List:</h3>
+                </div>
+            </div>
+        
+        <!-- The core Firebase JS SDK is always required and must be listed first -->
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-firestore.js"></script>
+
+        <script>
+            // Your web app's Firebase configuration
+            var firebaseConfig = {
+              apiKey: "AIzaSyCUdc-UiOGE34eFRJp_e21tsqrFBEZ5eqw",
+              authDomain: "task-ali-asgar.firebaseapp.com",
+              databaseURL: "https://task-ali-asgar.firebaseio.com",
+              projectId: "task-ali-asgar",
+              storageBucket: "task-ali-asgar.appspot.com",
+              messagingSenderId: "886217848636",
+              appId: "1:886217848636:web:1dddbddf3de445d9a25039"
+            };
+            // Initialize Firebase
+            firebase.initializeApp(firebaseConfig);
+          </script>
+          <script>
+            var mainText = document.getElementById("mainText");
+            var submitBtn = document.getElementById("submitBtn");
+            var submitSearch = document.getElementById("submitSearch");
+            var db = firebase.firestore();
+            function submitClick(){
+                var mainText = document.getElementById("mainText").value;
+                var emailText = document.getElementById("emailText").value;
+                // Add a new document in collection "cities"
+                db.collection("Users").doc().set({
+                    name: mainText,
+                    email: emailText
+                })
+                .then(function() {
+                    console.log("Document successfully written!");
+                })
+                .catch(function(error) {
+                    console.error("Error writing document: ", error);
+                });
+
+            //window.alert("OK")
+            //     var ref = firebase.database().ref();
+            
+            //     ref.on("value", function(snapshot) {
+            //     console.log(snapshot.val());
+            // }, function (error) {
+            // console.log("Error: " + error.code);
+            // });
+            }
+
+            const list_div = document.querySelector("#list_div");
+            
+            db.collection("users").onSnapshot(function(querySnapshot) {
+            querySnapshot.docChanges().forEach(function(change) {
+
+                // doc.data() is never undefined for query doc snapshots
+                if(change.type === "added"){
+                    list_div.innerHTML += "<div><h5>"+change.doc.data().query+"</h5><p>"+change.doc.data().store_data+"<br>"+change.doc.data().g_api_data+"<br>"+change.doc.data().percentage+"</div>"
+                }
+                //list_div.innerHTML += "<div><h5>"+doc.data().name+"</h5><p>"+doc.data().email+"</p></div>"
+                //console.log(doc.id, " => ", doc.data());
+            });
+        });
+
+        function submitSearch(){
+            const list_div1 = document.querySelector("#list_div1");
+            var user_search = document.getElementById("user_search");
+            
+            console.log(user_search)
+            // Create a reference to the cities collection
+            var UserRef = db.collection("Users");
+            
+            // Create a query against the collection.
+            var query = UserRef.where("name", "==", user_search).get().then(function(querySnapshot) {
+            querySnapshot.forEach(function(doc) {
+            // doc.data() is never undefined for query doc snapshots
+            console.log(doc.id, " => ", doc.data());
+            list_div1.innerHTML += "<div><h5>"+doc.data().name+"</h5><p>"+doc.data().email+"</p></div>"
+        });
+        })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
+        });
+        }
+            
+            
+          </script>
+          </body>
+</html>
